@@ -4,8 +4,8 @@ if (document.readyState !== 'loading') {
     document.addEventListener('DOMContentLoaded', ready);
 }
 
-function ready () {
-    getBlogposts('/get-posts');
+function ready() {
+    getBlogposts('/posts');
 
     // send posts to server
     var form = document.querySelector('form');
@@ -22,52 +22,52 @@ function ready () {
 /****
  * Function definitions
  ***/
-function postBlogposts (url, data) {
+function postBlogposts(url, data) {
     fetch(url, {
-        method: 'POST',
-        body: data
-    })
-    .then(function (res) {
-        res.json()
-            .then(function (json) {
-                console.log(json);
-                addBlogpostsToPage(json);
-                document.querySelector('form').reset();
+            method: 'POST',
+            body: data
         })
-    })
-    .catch(function (err) {
-        console.error(err)
-    });
-}
-
-function getBlogposts (url) {
-    fetch(url, {
-        method: 'GET'
-    })
-    .then(function (res) {
-        res.json()
-        .then(function (json) {
-            console.log(json);
-            addBlogpostsToPage(json);
+        .then(function (res) {
+            res.json()
+                .then(function (json) {
+                    console.log(json);
+                    addBlogpostsToPage(json);
+                    document.querySelector('form').reset();
+                })
+        })
+        .catch(function (err) {
+            console.error(err)
         });
-    })
-    .catch(function (err) {
-        console.error(err)
-    });
 }
 
-function addBlogpostsToPage (data) {
+function getBlogposts(url) {
+    fetch(url, {
+            method: 'GET'
+        })
+        .then(function (res) {
+            res.json()
+                .then(function (json) {
+                    console.log(json);
+                    addBlogpostsToPage(json);
+                });
+        })
+        .catch(function (err) {
+            console.error(err)
+        });
+}
+
+function addBlogpostsToPage(data) {
     for (var blogpost in data) {
         if (data.hasOwnProperty(blogpost)) {
 
-            var postDiv         = document.createElement('div');
-            var postText        = document.createElement('div');
-            var postContainer   = document.querySelector('.post-container');
+            var postDiv = document.createElement('div');
+            var postText = document.createElement('div');
+            var postContainer = document.querySelector('.post-container');
 
             // put <p> tags around each separate line of blogpost, otherwise
             // they will all run together
-            postText.innerHTML = data[blogpost].split('\n').map(function(item){
-              return '<p>'+item+'</p>';
+            postText.innerHTML = data[blogpost].split('\n').map(function (item) {
+                return '<p>' + item + '</p>';
             }).join('');
             postText.className = 'postBody';
             postDiv.className = 'post';

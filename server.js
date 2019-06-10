@@ -1,24 +1,41 @@
 // we are making a server in this file
-var express = require('express') // imports express into our server
-var formidable = require('express-formidable') // imports express-formidable middleware to draw form data out 
+var express = require("express") // imports express into our server
+var formidable = require("express-formidable") // imports express-formidable middleware to draw form data out
 var app = express() // initialises an instance of the express server called 'app'
-var fs = require('fs')
-app.use(formidable()) // use express-formidable 
-app.use(express.static("public")); // serve all static assets from the public folder
+var fs = require("fs")
+app.use(formidable()) // use express-formidable
+app.use(express.static("public")) // serve all static assets from the public folder
 
 // *** SENDING DATA TO SERVER FROM FORM ON PAGE *** //
-app.post('/create-post', function (req, res) {
-  event.preventDefault()
-  console.log('/create-post')
-  console.log(req.fields)
+app.get("/posts", async (req, res) => {
+	fs.readFile(__dirname + "/data/posts.json", function(error, file) {
+		const parsedFile = JSON.parse(file) // parse posts.json
+		console.log(parsedFile)
+		res.send(parsedFile)
+	})
 })
 
-// this reads out the content of the 
-fs.readFile((__dirname + '/data/posts.json'), function (error, file) {
-  console.log(file.toString()) // convert file to string so that it isn't just the raw buffer 
-  let parsedFile = JSON.parse(file)
-  console.log('parsedFile:', parsedFile)
+app.post("/posts", function(req, res) {
+	if (!req.fields.blogspot) return res.status(400).send("Missing required field: blogspot")
+	const content = req.fields.blogspot
+	console.log("content:", content)
 
+	fs.readFile(__dirname + "/data/posts.json", function(error, file) {
+		if (error) throw new Error("Failed to read posts")
+
+		const existingPosts = JSON.parse(file) // parse posts.json
+		console.log("existingPosts BEFORE:", existingPosts)
+		const now = Date.now()
+		existingPosts[now] = content
+		console.log("existingPosts AFTER:", existingPosts)
+		const newPosts = JSON.stringify(existingPosts)
+		console.log("newPosts:", newPosts)
+
+		fs.writeFile(__dirname + "/data/posts.json", newPosts, function(error) {
+			if (error) throw new Error("Failed to save posts")
+			res.send({ [now]: content })
+		})
+	})
 })
 
 // *** ALL REQUESTING DATA FROM SERVER TO SEND TO CLIENT *** //
@@ -42,6 +59,6 @@ fs.readFile((__dirname + '/data/posts.json'), function (error, file) {
 
 // set up a port (3000) or endpoint, which is where requests will come through
 // listen method takes port and callback function to do things once server is running
-app.listen(3000, function () {
-  console.log("My server is listening on port 3000. Ready to accept requests!")
+app.listen(3000, function() {
+	console.log("My server is listening on port 3000. Ready to accept requests!")
 })
